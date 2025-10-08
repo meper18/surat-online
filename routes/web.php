@@ -20,6 +20,15 @@ Route::get('/', function () {
 });
 
 // Debug route untuk melihat error detail
+Route::get('/test-basic', function () {
+    return response()->json([
+        'status' => 'OK',
+        'message' => 'Basic test endpoint working',
+        'timestamp' => now(),
+        'php_version' => PHP_VERSION,
+    ]);
+});
+
 Route::get('/debug-info', function () {
     return response()->json([
         'app_debug' => config('app.debug'),
