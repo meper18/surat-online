@@ -8,4 +8,4 @@ cmds = ['composer install --no-dev --optimize-autoloader']
 cmds = ['npm ci', 'npm run build']
 
 [start]
-cmd = 'rm -f /tmp/database.sqlite && touch /tmp/database.sqlite && chmod 666 /tmp/database.sqlite && cp .env.railway .env && php artisan config:clear && php artisan cache:clear && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT'
+cmd = 'rm -f /tmp/database.sqlite && touch /tmp/database.sqlite && chmod 666 /tmp/database.sqlite && cp .env.railway .env && php artisan config:clear && php artisan cache:clear && php artisan migrate --force && php artisan db:seed --class=RoleSeeder --force && php artisan serve --host=0.0.0.0 --port=$PORT'

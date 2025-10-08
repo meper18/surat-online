@@ -59,6 +59,11 @@ class AuthController extends Controller
     {
         // Mendapatkan role warga
         $wargaRole = Role::where('name', 'warga')->first();
+        
+        // Jika role warga tidak ditemukan, buat error yang lebih informatif
+        if (!$wargaRole) {
+            return back()->withErrors(['error' => 'Role warga tidak ditemukan. Silakan hubungi administrator.']);
+        }
 
         $user = User::create([
             'name' => $request->name,
