@@ -1,8 +1,25 @@
 [phases.setup]
-nixPkgs = ["php82", "php82Packages.composer", "nodejs_18"]
+nixPkgs = ['nodejs', 'php82', 'php82Packages.composer']
+
+[phases.install]
+cmds = ['composer install --no-dev --optimize-autoloader']
 
 [phases.build]
-cmds = ["composer install --no-dev --optimize-autoloader", "npm ci", "npm run build"]
+cmds = ['npm ci', 'npm run build']
 
 [start]
-cmd = "touch /tmp/database.sqlite && chmod 777 /tmp/database.sqlite && chmod -R 775 storage bootstrap/cache && cp .env.railway .env && php artisan key:generate --force && php artisan config:clear && php artisan cache:clear && php artisan view:clear && php artisan route:clear && php artisan migrate --force || echo 'Migration failed, continuing...' && php -S 0.0.0.0:$PORT -t public/"
+cmd = '''
+mkdir -p /tmp/database.sqlite
+touch /tmp/database.sqlite
+chmod 666 /tmp/database.sqlite
+mkdir -p /tmp/sessions
+chmod 777 /tmp/sessions
+cp .env.railway .env
+php artisan key:generate --force
+php artisan config:clear
+php artisan cache:clear
+php artisan route:clear
+php artisan view:clear
+php artisan migrate --force
+php artisan serve --host=0.0.0.0 --port=$PORT
+'''
