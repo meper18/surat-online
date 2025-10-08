@@ -19,6 +19,23 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+// Debug route untuk melihat error detail
+Route::get('/debug-info', function () {
+    return response()->json([
+        'app_debug' => config('app.debug'),
+        'app_env' => config('app.env'),
+        'app_key' => config('app.key') ? 'SET' : 'NOT SET',
+        'database_connection' => config('database.default'),
+        'database_host' => config('database.connections.mysql.host'),
+        'database_name' => config('database.connections.mysql.database'),
+        'php_version' => PHP_VERSION,
+        'laravel_version' => app()->version(),
+        'storage_writable' => is_writable(storage_path()),
+        'cache_writable' => is_writable(storage_path('framework/cache')),
+        'logs_writable' => is_writable(storage_path('logs')),
+    ]);
+});
+
 // QR Code verification route (public)
 Route::get('/verify/{kode_permohonan}', [PermohonanController::class, 'verifyQRCode'])->name('permohonan.verify');
 
