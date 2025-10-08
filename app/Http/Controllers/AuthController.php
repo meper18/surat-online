@@ -36,7 +36,7 @@ class AuthController extends Controller
                 null,
                 null,
                 null,
-                "User {Auth::user()->name} berhasil login"
+                "User " . Auth::user()->name . " berhasil login"
             );
             
             return $this->redirectBasedOnRole(Auth::user());
