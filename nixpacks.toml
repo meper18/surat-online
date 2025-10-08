@@ -5,4 +5,4 @@ nixPkgs = ["php82", "php82Packages.composer", "nodejs_18"]
 cmds = ["composer install --no-dev --optimize-autoloader", "npm ci", "npm run build"]
 
 [start]
-cmd = "php artisan migrate --force || echo 'Migration failed, continuing...' && php -S 0.0.0.0:$PORT -t public/"
+cmd = "php artisan config:clear && php artisan cache:clear && php artisan migrate --force || echo 'Migration failed, continuing...' && php -S 0.0.0.0:$PORT -t public/"
