@@ -5,4 +5,4 @@ nixPkgs = ["php82", "php82Packages.composer", "nodejs_18"]
 cmds = ["composer install --no-dev --optimize-autoloader", "npm ci", "npm run build"]
 
 [start]
-cmd = "chmod -R 775 storage bootstrap/cache && php artisan key:generate --force && php artisan config:clear && php artisan cache:clear && php artisan view:clear && php artisan route:clear && php artisan migrate --force || echo 'Migration failed, continuing...' && php -S 0.0.0.0:$PORT -t public/"
+cmd = "touch /tmp/database.sqlite && chmod 777 /tmp/database.sqlite && chmod -R 775 storage bootstrap/cache && cp .env.railway .env && php artisan key:generate --force && php artisan config:clear && php artisan cache:clear && php artisan view:clear && php artisan route:clear && php artisan migrate --force || echo 'Migration failed, continuing...' && php -S 0.0.0.0:$PORT -t public/"
