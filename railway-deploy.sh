@@ -3,6 +3,10 @@
 # Railway deployment script with database connection retry
 echo "Starting Railway deployment..."
 
+# Copy database file to production location
+echo "Setting up database..."
+php copy_database_to_railway.php
+
 # Wait for database to be ready
 echo "Waiting for database connection..."
 for i in {1..30}; do
@@ -24,12 +28,20 @@ done
 echo "Caching configuration..."
 php artisan config:cache
 
-# Run migrations
+# Run migrations (in case new migrations exist)
 echo "Running migrations..."
 php artisan migrate --force
 
-# Run seeders
-echo "Running seeders..."
-php artisan db:seed --force
+# Verify jenis surat data exists
+echo "Verifying jenis surat data..."
+php artisan tinker --execute="
+\$count = App\Models\JenisSurat::count();
+echo 'JenisSurat count: ' . \$count . PHP_EOL;
+if (\$count == 0) {
+    echo 'Running JenisSuratSeeder...' . PHP_EOL;
+    Artisan::call('db:seed', ['--class' => 'JenisSuratSeeder', '--force' => true]);
+    echo 'Seeder completed' . PHP_EOL;
+}
+"
 
 echo "Deployment completed successfully!"
