@@ -131,14 +131,27 @@ $setupResults = [];
 
 <?php
 
-// MySQL Configuration
+// MySQL Configuration - Try Railway internal service first
 $mysqlConfig = [
-    'host' => $_ENV['MYSQLHOST'] ?? $_SERVER['MYSQLHOST'] ?? getenv('MYSQLHOST') ?? 'localhost',
+    'host' => $_ENV['MYSQLHOST'] ?? $_SERVER['MYSQLHOST'] ?? getenv('MYSQLHOST') ?? 'mysql.railway.internal',
     'port' => $_ENV['MYSQLPORT'] ?? $_SERVER['MYSQLPORT'] ?? getenv('MYSQLPORT') ?? '3306',
     'database' => $_ENV['MYSQLDATABASE'] ?? $_SERVER['MYSQLDATABASE'] ?? getenv('MYSQLDATABASE') ?? 'railway',
     'username' => $_ENV['MYSQLUSER'] ?? $_SERVER['MYSQLUSER'] ?? getenv('MYSQLUSER') ?? 'root',
-    'password' => $_ENV['MYSQLPASSWORD'] ?? $_SERVER['MYSQLPASSWORD'] ?? getenv('MYSQLPASSWORD') ?? '',
+    'password' => $_ENV['MYSQLPASSWORD'] ?? $_SERVER['MYSQLPASSWORD'] ?? getenv('MYSQLPASSWORD') ?? 'password',
 ];
+
+// Try to parse DATABASE_URL if available (Railway's preferred method)
+$databaseUrl = $_ENV['DATABASE_URL'] ?? $_SERVER['DATABASE_URL'] ?? getenv('DATABASE_URL') ?? '';
+if (!empty($databaseUrl)) {
+    $parsed = parse_url($databaseUrl);
+    if ($parsed) {
+        $mysqlConfig['host'] = $parsed['host'] ?? $mysqlConfig['host'];
+        $mysqlConfig['port'] = $parsed['port'] ?? $mysqlConfig['port'];
+        $mysqlConfig['database'] = ltrim($parsed['path'] ?? '', '/') ?: $mysqlConfig['database'];
+        $mysqlConfig['username'] = $parsed['user'] ?? $mysqlConfig['username'];
+        $mysqlConfig['password'] = $parsed['pass'] ?? $mysqlConfig['password'];
+    }
+}
 
 // Check MySQL Configuration
 echo "<div class='section'>";
