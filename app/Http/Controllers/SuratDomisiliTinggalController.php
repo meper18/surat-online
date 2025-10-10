@@ -31,6 +31,51 @@ class SuratDomisiliTinggalController extends Controller
     }
 
     /**
+     * Store surat domisili tinggal details
+     */
+    public function store(Request $request, $permohonanId)
+    {
+        $request->validate([
+            'alamat_sekarang' => 'required|string',
+            'keperluan' => 'required|string|max:255',
+        ]);
+
+        $permohonan = Permohonan::findOrFail($permohonanId);
+        
+        // Check if user owns this permohonan or has admin/operator role
+        /** @var User $user */
+        $user = Auth::user();
+        if ($permohonan->user_id !== Auth::id() && !$user->hasRole(['admin', 'operator'])) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Create or update surat domisili tinggal
+        $suratDomisiliTinggal = SuratDomisiliTinggal::updateOrCreate(
+            ['permohonan_id' => $permohonanId],
+            [
+                'alamat_sekarang' => $request->alamat_sekarang,
+                'keperluan' => $request->keperluan,
+            ]
+        );
+
+        // Update permohonan status if needed
+        if ($permohonan->status === 'pending') {
+            $permohonan->update(['status' => 'diproses']);
+        }
+
+        // Determine redirect route based on user role
+        $routePrefix = 'warga';
+        if ($user->hasRole('admin')) {
+            $routePrefix = 'admin';
+        } elseif ($user->hasRole('operator')) {
+            $routePrefix = 'operator';
+        }
+
+        return redirect()->route($routePrefix . '.permohonan.index')
+            ->with('success', 'Data surat domisili tinggal berhasil disimpan!');
+    }
+
+    /**
      * Update surat domisili tinggal
      */
     public function update(Request $request, Permohonan $permohonan)
