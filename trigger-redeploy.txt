@@ -1,0 +1,2 @@
+Railway redeploy trigger - MySQL environment variables updated
+Timestamp: 2025-10-10 16:23:00
