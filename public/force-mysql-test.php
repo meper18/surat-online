@@ -6,11 +6,11 @@ echo "<p><strong>Timestamp:</strong> " . date('Y-m-d H:i:s') . "</p>";
 // Try different connection methods
 $connectionMethods = [
     'Railway Internal' => [
-        'host' => 'mysql.railway.internal',
-        'port' => '3306',
-        'database' => 'railway',
-        'username' => 'root',
-        'password' => 'password'
+        'host' => getenv('MYSQLHOST') ?: 'mysql.railway.internal',
+        'port' => getenv('MYSQLPORT') ?: '3306',
+        'database' => getenv('MYSQLDATABASE') ?: 'railway',
+        'username' => getenv('MYSQLUSER') ?: 'root',
+        'password' => getenv('MYSQLPASSWORD') ?: 'default_password'
     ],
     'Environment Variables' => [
         'host' => getenv('MYSQLHOST') ?: 'localhost',
