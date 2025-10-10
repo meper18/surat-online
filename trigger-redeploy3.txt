@@ -1,0 +1,2 @@
+Trigger redeploy - 2025-10-10 17:41:00
+Force Railway to redeploy with updated environment variables
