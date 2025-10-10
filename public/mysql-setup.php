@@ -135,7 +135,7 @@ $mysqlConfig = [
     'port' => $_ENV['MYSQLPORT'] ?? $_SERVER['MYSQLPORT'] ?? '3306',
     'database' => $_ENV['MYSQLDATABASE'] ?? $_SERVER['MYSQLDATABASE'] ?? 'railway',
     'username' => $_ENV['MYSQLUSER'] ?? $_SERVER['MYSQLUSER'] ?? 'root',
-    'password' => $_ENV['MYSQLPASSWORD'] ?? $_SERVER['MYSQLPASSWORD'] ?? '',
+    'password' => $_ENV['MYSQLPASSWORD'] ?? $_SERVER['MYSQLPASSWORD'] ?? 'XQKSMTWvXSMKoKFoXAznbkZgIdEGZiIv',
 ];
 
 echo "<h3>📊 MySQL Configuration</h3>";
