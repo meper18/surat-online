@@ -1,108 +1,187 @@
 <?php
-// Composer Install Script for Railway
-echo "<h2>Composer Dependencies Installation</h2>";
+echo "<h1>Enhanced Composer Installation for Railway</h1>";
 
-// Check current directory
-echo "<h3>Current Directory:</h3>";
-echo "<p>" . getcwd() . "</p>";
+// Set environment variables that Composer needs
+putenv('HOME=/tmp');
+putenv('COMPOSER_HOME=/tmp/.composer');
 
-// Check if we can change to project root
-$projectRoot = dirname(__DIR__);
-echo "<h3>Project Root:</h3>";
-echo "<p>$projectRoot</p>";
+echo "<h2>Environment Setup:</h2>";
+echo "Setting HOME=/tmp<br>";
+echo "Setting COMPOSER_HOME=/tmp/.composer<br><br>";
 
 // Check if composer.json exists
-if (file_exists($projectRoot . '/composer.json')) {
-    echo "<p style='color: green;'>✅ composer.json found</p>";
-} else {
-    echo "<p style='color: red;'>❌ composer.json NOT found</p>";
+if (!file_exists('/app/composer.json')) {
+    echo "<p style='color: red;'>❌ composer.json not found in /app/</p>";
     exit;
 }
 
-// Check if composer is available
-echo "<h3>Composer Check:</h3>";
-$composerCheck = shell_exec('which composer 2>/dev/null || echo "not found"');
-if (trim($composerCheck) !== 'not found') {
-    echo "<p style='color: green;'>✅ Composer is available: " . trim($composerCheck) . "</p>";
-} else {
-    echo "<p style='color: orange;'>⚠️ Composer command not found, trying alternative methods</p>";
+echo "<p style='color: green;'>✅ composer.json found</p>";
+
+// Create necessary directories
+$dirs = ['/tmp', '/tmp/.composer', '/app/vendor'];
+foreach ($dirs as $dir) {
+    if (!is_dir($dir)) {
+        mkdir($dir, 0755, true);
+        echo "Created directory: $dir<br>";
+    }
 }
 
-// Try to run composer install
-echo "<h3>Installing Dependencies:</h3>";
-echo "<p>Running composer install...</p>";
+echo "<h2>Downloading Composer:</h2>";
 
-// Change to project directory
-chdir($projectRoot);
+// Download Composer installer
+$composerSetup = '/tmp/composer-setup.php';
+$composerPhar = '/tmp/composer.phar';
 
-// Execute composer install
+// Download Composer installer
+echo "Downloading Composer installer...<br>";
+$installer = file_get_contents('https://getcomposer.org/installer');
+if ($installer === false) {
+    echo "<p style='color: red;'>❌ Failed to download Composer installer</p>";
+    exit;
+}
+
+file_put_contents($composerSetup, $installer);
+echo "<p style='color: green;'>✅ Composer installer downloaded</p>";
+
+// Run Composer installer
+echo "<h2>Installing Composer:</h2>";
+chdir('/tmp');
+
 $output = [];
-$returnCode = 0;
+$return_var = 0;
 
-// Try different composer commands
+// Install Composer
+exec("php composer-setup.php 2>&1", $output, $return_var);
+
+echo "<pre>";
+foreach ($output as $line) {
+    echo htmlspecialchars($line) . "\n";
+}
+echo "</pre>";
+
+if ($return_var !== 0) {
+    echo "<p style='color: red;'>❌ Composer installation failed</p>";
+    exit;
+}
+
+if (!file_exists($composerPhar)) {
+    echo "<p style='color: red;'>❌ composer.phar not created</p>";
+    exit;
+}
+
+echo "<p style='color: green;'>✅ Composer installed successfully</p>";
+
+// Change to app directory
+chdir('/app');
+
+echo "<h2>Installing Dependencies:</h2>";
+
+// Run composer install with various options
 $commands = [
-    'composer install --no-dev --optimize-autoloader 2>&1',
-    'php composer.phar install --no-dev --optimize-autoloader 2>&1',
-    '/usr/local/bin/composer install --no-dev --optimize-autoloader 2>&1'
+    "php /tmp/composer.phar install --no-dev --optimize-autoloader --no-interaction",
+    "php /tmp/composer.phar install --optimize-autoloader --no-interaction",
+    "php /tmp/composer.phar install --no-interaction"
 ];
 
+$success = false;
 foreach ($commands as $cmd) {
-    echo "<p>Trying: <code>$cmd</code></p>";
-    exec($cmd, $output, $returnCode);
+    echo "<strong>Trying:</strong> $cmd<br>";
     
-    if ($returnCode === 0) {
-        echo "<p style='color: green;'>✅ Composer install successful!</p>";
+    $output = [];
+    $return_var = 0;
+    
+    exec($cmd . " 2>&1", $output, $return_var);
+    
+    echo "<pre>";
+    foreach ($output as $line) {
+        echo htmlspecialchars($line) . "\n";
+    }
+    echo "</pre>";
+    
+    if ($return_var === 0) {
+        echo "<p style='color: green;'>✅ Dependencies installed successfully!</p>";
+        $success = true;
         break;
     } else {
-        echo "<p style='color: red;'>❌ Command failed with code: $returnCode</p>";
-        echo "<pre style='background: #ffe6e6; padding: 10px;'>";
-        echo htmlspecialchars(implode("\n", $output));
-        echo "</pre>";
-        $output = []; // Reset for next command
+        echo "<p style='color: orange;'>⚠️ Command failed with code: $return_var</p><br>";
     }
 }
 
-// Check if vendor directory was created
-if (is_dir($projectRoot . '/vendor')) {
-    echo "<p style='color: green;'>✅ Vendor directory created</p>";
+if (!$success) {
+    echo "<p style='color: red;'>❌ All composer install attempts failed</p>";
     
-    // Check if autoload file exists
-    if (file_exists($projectRoot . '/vendor/autoload.php')) {
-        echo "<p style='color: green;'>✅ Autoload file created</p>";
-        
-        // Test autoload
-        try {
-            require_once $projectRoot . '/vendor/autoload.php';
-            echo "<p style='color: green;'>✅ Autoload works</p>";
-            
-            // Test Laravel classes
-            if (class_exists('Illuminate\Foundation\Application')) {
-                echo "<p style='color: green;'>✅ Laravel classes available</p>";
-            } else {
-                echo "<p style='color: red;'>❌ Laravel classes still not available</p>";
-            }
-            
-        } catch (Exception $e) {
-            echo "<p style='color: red;'>❌ Autoload error: " . $e->getMessage() . "</p>";
-        }
-    } else {
-        echo "<p style='color: red;'>❌ Autoload file not created</p>";
+    // Try to create vendor directory manually and download core files
+    echo "<h2>Attempting Manual Dependency Setup:</h2>";
+    
+    if (!is_dir('/app/vendor')) {
+        mkdir('/app/vendor', 0755, true);
     }
-} else {
-    echo "<p style='color: red;'>❌ Vendor directory not created</p>";
+    
+    // Try to create a basic autoload.php
+    $autoloadContent = '<?php
+// Basic autoload for Laravel
+spl_autoload_register(function ($class) {
+    $file = __DIR__ . "/" . str_replace("\\\\", "/", $class) . ".php";
+    if (file_exists($file)) {
+        require $file;
+    }
+});
+
+// Include Laravel framework if available
+$frameworkAutoload = __DIR__ . "/laravel/framework/src/Illuminate/Foundation/helpers.php";
+if (file_exists($frameworkAutoload)) {
+    require $frameworkAutoload;
+}
+';
+    
+    file_put_contents('/app/vendor/autoload.php', $autoloadContent);
+    echo "Created basic autoload.php<br>";
 }
 
-// Show final status
-echo "<h3>Final Status:</h3>";
-if (is_dir($projectRoot . '/vendor') && file_exists($projectRoot . '/vendor/autoload.php')) {
-    echo "<p style='color: green; font-weight: bold;'>✅ Dependencies installed successfully!</p>";
-    echo "<p><a href='/'>Try Main Application Now</a></p>";
+echo "<h2>Verification:</h2>";
+
+// Check vendor directory
+if (is_dir('/app/vendor')) {
+    echo "<p style='color: green;'>✅ vendor/ directory exists</p>";
+    
+    $vendorFiles = scandir('/app/vendor');
+    echo "Vendor contents: " . implode(', ', array_slice($vendorFiles, 2)) . "<br>";
 } else {
-    echo "<p style='color: red; font-weight: bold;'>❌ Dependencies installation failed</p>";
-    echo "<p>Manual intervention may be required on Railway deployment.</p>";
+    echo "<p style='color: red;'>❌ vendor/ directory missing</p>";
 }
 
-echo "<hr>";
-echo "<p><a href='/simple-test.php'>← Test Dependencies</a></p>";
-echo "<p><a href='/fix-mysql.php'>← MySQL Fix</a></p>";
+// Check autoload.php
+if (file_exists('/app/vendor/autoload.php')) {
+    echo "<p style='color: green;'>✅ autoload.php exists</p>";
+} else {
+    echo "<p style='color: red;'>❌ autoload.php missing</p>";
+}
+
+// Test Laravel class loading
+echo "<h2>Testing Laravel Classes:</h2>";
+
+if (file_exists('/app/vendor/autoload.php')) {
+    require_once '/app/vendor/autoload.php';
+    
+    $classes = [
+        'Illuminate\\Foundation\\Application',
+        'Illuminate\\Support\\Facades\\DB',
+        'Illuminate\\Http\\Request'
+    ];
+    
+    foreach ($classes as $class) {
+        if (class_exists($class)) {
+            echo "<p style='color: green;'>✅ $class available</p>";
+        } else {
+            echo "<p style='color: red;'>❌ $class not found</p>";
+        }
+    }
+}
+
+echo "<h2>Next Steps:</h2>";
+echo "<p>1. If dependencies were installed successfully, test the main Laravel application</p>";
+echo "<p>2. If installation failed, Railway may need manual dependency management</p>";
+echo "<p>3. Check the main application at: <a href='/'>Main Application</a></p>";
+
+echo "<br><p><a href='/'>← Back to Main Application</a></p>";
 ?>
