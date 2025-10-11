@@ -305,9 +305,105 @@ if ($_POST) {
     }
 }
 
+    // Verify Tables
+    if (isset($_POST['verify_tables'])) {
+        echo "<div class='section'>";
+        echo "<h2>📊 Database Tables Verification</h2>";
+        
+        try {
+            $dsn = "mysql:host={$config['host']};port={$config['port']};dbname={$config['database']};charset=utf8mb4";
+            $pdo = new PDO($dsn, $config['username'], $config['password'], [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            ]);
+            
+            // Get all tables
+            $stmt = $pdo->query("SHOW TABLES");
+            $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            if (count($tables) > 0) {
+                echo "<div class='success'>✅ Found " . count($tables) . " tables in database:</div>";
+                echo "<div class='code'>";
+                foreach ($tables as $table) {
+                    echo "📋 " . $table . "<br>";
+                }
+                echo "</div>";
+                
+                // Check for key Laravel tables
+                $expectedTables = ['users', 'roles', 'permohonans', 'jenis_surats', 'migrations'];
+                $missingTables = [];
+                foreach ($expectedTables as $expectedTable) {
+                    if (!in_array($expectedTable, $tables)) {
+                        $missingTables[] = $expectedTable;
+                    }
+                }
+                
+                if (empty($missingTables)) {
+                    echo "<div class='success'>✅ All key Laravel tables are present!</div>";
+                } else {
+                    echo "<div class='warning'>⚠️ Missing tables: " . implode(', ', $missingTables) . "</div>";
+                }
+            } else {
+                echo "<div class='warning'>⚠️ No tables found in database. You may need to run migrations.</div>";
+            }
+            
+        } catch (Exception $e) {
+            echo "<div class='error'>❌ Table verification failed: " . $e->getMessage() . "</div>";
+        }
+        echo "</div>";
+    }
+    // Verify Tables
+    if (isset($_POST['verify_tables'])) {
+        echo "<div class='section'>";
+        echo "<h2>📊 Database Tables Verification</h2>";
+        
+        try {
+            $dsn = "mysql:host={$config['host']};port={$config['port']};dbname={$config['database']};charset=utf8mb4";
+            $pdo = new PDO($dsn, $config['username'], $config['password'], [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            ]);
+            
+            // Get all tables
+            $stmt = $pdo->query("SHOW TABLES");
+            $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            if (count($tables) > 0) {
+                echo "<div class='success'>✅ Found " . count($tables) . " tables in database:</div>";
+                echo "<div class='code'>";
+                foreach ($tables as $table) {
+                    echo "📋 " . $table . "<br>";
+                }
+                echo "</div>";
+                
+                // Check for key Laravel tables
+                $expectedTables = ['users', 'roles', 'permohonans', 'jenis_surats', 'migrations'];
+                $missingTables = [];
+                foreach ($expectedTables as $expectedTable) {
+                    if (!in_array($expectedTable, $tables)) {
+                        $missingTables[] = $expectedTable;
+                    }
+                }
+                
+                if (empty($missingTables)) {
+                    echo "<div class='success'>✅ All key Laravel tables are present!</div>";
+                } else {
+                    echo "<div class='warning'>⚠️ Missing tables: " . implode(', ', $missingTables) . "</div>";
+                }
+            } else {
+                echo "<div class='warning'>⚠️ No tables found in database. You may need to run migrations.</div>";
+            }
+            
+        } catch (Exception $e) {
+            echo "<div class='error'>❌ Table verification failed: " . $e->getMessage() . "</div>";
+        }
+        echo "</div>";
+    }
+
 // Quick Actions
 echo "<div class='section'>";
 echo "<h2>⚡ Quick Actions</h2>";
+echo "<form method='post' style='display: inline;'>";
+echo "<button type='submit' name='verify_tables' class='btn'>📊 Verify Tables</button>";
+echo "</form>";
 echo "<a href='?action=refresh' class='btn'>🔄 Refresh Page</a>";
 echo "<a href='/debug-env.php' class='btn'>🔍 Debug Environment</a>";
 echo "<a href='/check-mysql-url.php' class='btn'>🔗 Check MySQL URL</a>";
