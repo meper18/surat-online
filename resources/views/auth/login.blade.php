@@ -191,7 +191,7 @@
     <div class="login-container">
         <div class="login-card">
             <div class="login-icon">
-                <i class="fas fa-sign-in-alt"></i>
+                <img src="{{ asset('images/logo-kelurahan.svg') }}" alt="Logo Kelurahan" style="width: 70px; height: 70px;">
             </div>
             
             <h1 class="login-title">Sistem Layanan Surat Online Kelurahan</h1>
@@ -231,9 +231,7 @@
                     </div>
                 </div>
                 
-                <div class="forgot-password">
-                    <a href="#">Forgot password?</a>
-                </div>
+               
                 
                 <button type="submit" class="btn btn-get-started">
                      Login

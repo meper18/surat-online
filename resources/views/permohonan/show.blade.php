@@ -529,6 +529,10 @@
         // Show modal
         modal.show();
         
+        // Debug logging
+        console.log('Document URL:', documentUrl);
+        console.log('MIME Type:', mimeType);
+        
         // Load document content based on mime type
         if (mimeType && (mimeType.includes('image/') || mimeType === 'image/jpeg' || mimeType === 'image/jpg' || mimeType === 'image/png')) {
             // For images
@@ -538,27 +542,69 @@
                 documentContent.innerHTML = `<img src="${documentUrl}" class="img-fluid" alt="${documentName}" style="max-height: 70vh;">`;
             };
             img.onerror = function() {
+                console.error('Image load error for:', documentUrl);
                 documentLoading.classList.add('d-none');
                 documentContent.innerHTML = `
                     <div class="alert alert-warning">
                         <i class="fas fa-exclamation-triangle me-2"></i>
                         Tidak dapat memuat gambar. Silakan download untuk melihat dokumen.
+                        <br><small>URL: ${documentUrl}</small>
                     </div>
                 `;
             };
             img.src = documentUrl;
         } else if (mimeType && mimeType === 'application/pdf') {
-            // For PDFs
+            // For PDFs - Add error handling for iframe
             documentLoading.classList.add('d-none');
-            documentContent.innerHTML = `
-                <iframe src="${documentUrl}" 
-                        style="width: 100%; height: 70vh; border: none;" 
-                        title="${documentName}">
-                    <p>Browser Anda tidak mendukung tampilan PDF. 
-                       <a href="${downloadUrl}" target="_blank">Klik di sini untuk download</a>
-                    </p>
-                </iframe>
+            
+            // Create iframe with better error handling
+            const iframe = document.createElement('iframe');
+            iframe.src = documentUrl;
+            iframe.style.width = '100%';
+            iframe.style.height = '70vh';
+            iframe.style.border = 'none';
+            iframe.title = documentName;
+            
+            // Handle iframe load errors
+            iframe.onload = function() {
+                console.log('PDF loaded successfully');
+            };
+            
+            iframe.onerror = function() {
+                console.error('PDF load error for:', documentUrl);
+                documentContent.innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Tidak dapat memuat PDF. Silakan download untuk melihat dokumen.
+                        <br><small>URL: ${documentUrl}</small>
+                        <br><a href="${downloadUrl}" class="btn btn-sm btn-primary mt-2" target="_blank">
+                            <i class="fas fa-download me-1"></i>Download Dokumen
+                        </a>
+                    </div>
+                `;
+            };
+            
+            // Add fallback content
+            iframe.innerHTML = `
+                <p>Browser Anda tidak mendukung tampilan PDF. 
+                   <a href="${downloadUrl}" target="_blank">Klik di sini untuk download</a>
+                </p>
             `;
+            
+            documentContent.appendChild(iframe);
+            
+            // Additional check for PDF accessibility
+            setTimeout(function() {
+                try {
+                    // Test if iframe content is accessible
+                    if (iframe.contentDocument === null) {
+                        console.warn('PDF may not be loading properly');
+                    }
+                } catch (e) {
+                    console.log('Cross-origin iframe - this is normal for PDF files');
+                }
+            }, 1000);
+            
         } else {
             // For other file types
             documentLoading.classList.add('d-none');
@@ -567,6 +613,9 @@
                     <i class="fas fa-file me-2"></i>
                     <h6>Dokumen: ${documentName}</h6>
                     <p class="mb-0">Tipe file ini tidak dapat ditampilkan di browser. Silakan download untuk melihat dokumen.</p>
+                    <br><a href="${downloadUrl}" class="btn btn-sm btn-primary mt-2" target="_blank">
+                        <i class="fas fa-download me-1"></i>Download Dokumen
+                    </a>
                 </div>
             `;
         }
