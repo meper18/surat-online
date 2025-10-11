@@ -45,4 +45,3 @@ all_controllers_*
 
 # Temporary files
 TCPDFService.php
-ImprovedPDFService.php
