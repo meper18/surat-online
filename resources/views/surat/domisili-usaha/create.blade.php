@@ -403,29 +403,6 @@
     </div>
 </div>
 @endsection
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        <strong>Perhatian:</strong> 
-                        <ul class="mb-0 mt-2">
-                            <li>Pastikan nama usaha dan alamat yang dimasukkan sesuai dengan kondisi sebenarnya</li>
-                            <li>Data ini akan digunakan untuk generate PDF surat keterangan domisili usaha</li>
-                            <li>Surat ini dapat digunakan untuk berbagai keperluan perizinan dan administrasi usaha</li>
-                        </ul>
-                    </div>
-
-                    <div class="d-flex justify-content-between">
-                        <a href="{{ route('warga.permohonan.show', $permohonan) }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-1"></i>Kembali
-                        </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-1"></i>Simpan Data Surat
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-@endsection
 
 @section('scripts')
 <script>
